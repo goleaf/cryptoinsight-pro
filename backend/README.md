@@ -57,3 +57,10 @@ Located in `src/modules/alerts`.
 - In-memory repository with user scoping, trigger logs, and status updates.
 - AlertService for creation, evaluation, triggering, and sorting active vs triggered.
 - AlertChecker helper to poll active alerts against market snapshots and continue past errors.
+
+## Signals Module
+Located in `src/modules/signals`.
+
+- Indicator utilities (MA, EMA, RSI, MACD) and volatility/risk classification.
+- SignalAggregator combines trend, momentum, and risk with technical indicator snapshots and disclaimers.
+- Property-style specs in `signals.spec.ts` validate bounds, structures, and safe language.
