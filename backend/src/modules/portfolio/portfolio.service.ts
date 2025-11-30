@@ -60,9 +60,9 @@ export class PortfolioService {
       const mergedEntryPrice = mergedAmount > 0 ? mergedEntryValue / mergedAmount : existing.entryPrice;
 
       const mergedCurrentValue = existing.currentValue + p.currentValue;
-      const mergedUnrealizedPnl = existing.unrealizedPnl + p.unrealizedPnl;
-      const mergedEntryTotal = mergedEntryPrice * mergedAmount;
-      const mergedPnlPercent = mergedEntryTotal > 0 ? (mergedUnrealizedPnl / mergedEntryTotal) * 100 : 0;
+      const mergedInitialValue = existing.initialValue + p.initialValue;
+      const mergedUnrealizedPnL = existing.unrealizedPnL + p.unrealizedPnL;
+      const mergedPnLPercentage = mergedInitialValue > 0 ? (mergedUnrealizedPnL / mergedInitialValue) * 100 : 0;
 
       grouped.set(p.symbol, {
         ...existing,
@@ -70,8 +70,10 @@ export class PortfolioService {
         entryPrice: mergedEntryPrice,
         currentPrice: existing.currentPrice,
         currentValue: mergedCurrentValue,
-        unrealizedPnl: mergedUnrealizedPnl,
-        pnlPercent: mergedPnlPercent,
+        initialValue: mergedInitialValue,
+        unrealizedPnL: mergedUnrealizedPnL,
+        pnLPercentage: mergedPnLPercentage,
+        priceTimestamp: existing.priceTimestamp,
       });
     });
 

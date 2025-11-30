@@ -18,7 +18,7 @@ export class PositionRepository extends BaseRepository<Position> {
       symbol: input.symbol,
       amount: input.amount,
       entryPrice: input.entryPrice,
-      entryDate: input.entryDate,
+      entryDate: new Date(input.entryDate),
       createdAt: now,
       updatedAt: now,
     };
@@ -46,6 +46,7 @@ export class PositionRepository extends BaseRepository<Position> {
     const updated: Position = {
       ...existing,
       ...input,
+      entryDate: input.entryDate ? new Date(input.entryDate) : existing.entryDate,
       updatedAt: this.now(),
     };
 

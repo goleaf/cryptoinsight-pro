@@ -4,6 +4,7 @@ import { PortfolioController } from './portfolio.controller';
 import { PortfolioService } from './portfolio.service';
 import { PositionRepository } from './repository';
 import { PriceSource } from './types';
+import { HistoricalValueService } from './historical-value.service';
 
 declare const describe: any;
 declare const test: any;
@@ -41,6 +42,8 @@ describe('Portfolio module', () => {
 
   test('Feature: portfolio, Property 2: Invalid position rejection', () => {
     expect(() => repository.create('user1', { symbol: 'BTC-USDT', amount: -1, entryPrice: 100, entryDate: '2024-01-01' })).toThrow();
+    const future = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    expect(() => repository.create('user1', { symbol: 'BTC-USDT', amount: 1, entryPrice: 100, entryDate: future })).toThrow();
   });
 
   test('Feature: portfolio, Property 9: Position deletion removes record', () => {
@@ -145,5 +148,17 @@ describe('Portfolio module', () => {
     const response = controller.createPosition({ userId: 'user1', body: { symbol: '', amount: 0, entryPrice: -1, entryDate: '' } });
     expect((response as any).status).toBe(400);
     expect((response as any).message).toBeDefined();
+  });
+
+  test('Feature: portfolio, Property 16: Historical value calculation correctness', async () => {
+    repository.create('user1', { symbol: 'BTC-USDT', amount: 1, entryPrice: 100, entryDate: '2024-01-01' });
+    const historical = new HistoricalValueService(repository, new FakePriceSource({ 'BTC-USDT': 200 }));
+    const start = Date.now() - 3 * 60 * 60 * 1000;
+    const end = Date.now();
+    const result = await historical.getPortfolioHistory('user1', start, end, 60);
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((p) => {
+      expect(p.price).toBeCloseTo(200); // 1 * price
+    });
   });
 });

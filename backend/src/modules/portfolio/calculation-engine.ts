@@ -1,5 +1,5 @@
 import {
-  AllocationEntry,
+  AllocationItem,
   PortfolioAllocation,
   PortfolioSummary,
   Position,
@@ -48,57 +48,59 @@ export class CalculationEngine {
   public withMetrics(position: Position): PositionWithMetrics {
     const price = this.getPrice(position.symbol);
     const currentValue = price * position.amount;
-    const unrealizedPnl = (price - position.entryPrice) * position.amount;
-    const entryValue = position.entryPrice * position.amount;
-    const pnlPercent = entryValue > 0 ? (unrealizedPnl / entryValue) * 100 : 0;
+    const initialValue = position.entryPrice * position.amount;
+    const unrealizedPnL = currentValue - initialValue;
+    const pnLPercentage = initialValue > 0 ? (unrealizedPnL / initialValue) * 100 : 0;
 
     return {
       ...position,
       currentPrice: price,
       currentValue,
-      unrealizedPnl,
-      pnlPercent,
+      initialValue,
+      unrealizedPnL,
+      pnLPercentage,
+      priceTimestamp: Date.now(),
     };
   }
 
   public summarize(positions: PositionWithMetrics[]): PortfolioSummary {
     const totalValue = positions.reduce((sum, p) => sum + p.currentValue, 0);
-    const totalUnrealizedPnl = positions.reduce((sum, p) => sum + p.unrealizedPnl, 0);
-    const totalEntryValue = positions.reduce((sum, p) => sum + p.entryPrice * p.amount, 0);
-    const totalPnlPercent = totalEntryValue > 0 ? (totalUnrealizedPnl / totalEntryValue) * 100 : 0;
+    const totalUnrealizedPnL = positions.reduce((sum, p) => sum + p.unrealizedPnL, 0);
+    const totalInitialValue = positions.reduce((sum, p) => sum + p.initialValue, 0);
+    const totalPnLPercentage = totalInitialValue > 0 ? (totalUnrealizedPnL / totalInitialValue) * 100 : 0;
 
     return {
       totalValue,
-      totalUnrealizedPnl,
-      totalPnlPercent,
+      totalUnrealizedPnL,
+      totalPnLPercentage,
       positionCount: positions.length,
-      timestamp: Date.now(),
+      lastUpdated: Date.now(),
     };
   }
 
   public allocation(positions: PositionWithMetrics[]): PortfolioAllocation {
     const totalValue = positions.reduce((sum, p) => sum + p.currentValue, 0);
-    const entries: AllocationEntry[] = positions.map((p) => ({
+    const items: AllocationItem[] = positions.map((p) => ({
       symbol: p.symbol,
       value: p.currentValue,
       percentage: totalValue > 0 ? (p.currentValue / totalValue) * 100 : 0,
     }));
 
-    const normalized = this.normalizePercentages(entries);
+    const normalized = this.normalizePercentages(items);
 
     return {
-      entries: normalized,
+      items: normalized,
       totalValue,
-      timestamp: Date.now(),
+      lastUpdated: Date.now(),
     };
   }
 
-  private normalizePercentages(entries: AllocationEntry[]): AllocationEntry[] {
-    if (entries.length === 0) return entries;
-    const sum = entries.reduce((acc, e) => acc + e.percentage, 0);
-    if (sum === 100 || sum === 0) return entries;
+  private normalizePercentages(items: AllocationItem[]): AllocationItem[] {
+    if (items.length === 0) return items;
+    const sum = items.reduce((acc, e) => acc + e.percentage, 0);
+    if (sum === 100 || sum === 0) return items;
 
     const factor = 100 / sum;
-    return entries.map((e) => ({ ...e, percentage: e.percentage * factor }));
+    return items.map((e) => ({ ...e, percentage: e.percentage * factor }));
   }
 }

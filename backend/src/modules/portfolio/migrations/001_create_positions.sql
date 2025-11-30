@@ -1,14 +1,19 @@
 -- Positions table
 CREATE TABLE IF NOT EXISTS positions (
-  id SERIAL PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  symbol TEXT NOT NULL,
-  amount NUMERIC NOT NULL CHECK (amount > 0),
-  entry_price NUMERIC NOT NULL CHECK (entry_price > 0),
-  entry_date TIMESTAMPTZ NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id VARCHAR(255) NOT NULL,
+  symbol VARCHAR(50) NOT NULL,
+  entry_price DECIMAL(20, 8) NOT NULL,
+  amount DECIMAL(20, 8) NOT NULL,
+  entry_date TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  CONSTRAINT positive_entry_price CHECK (entry_price > 0),
+  CONSTRAINT positive_amount CHECK (amount > 0),
+  CONSTRAINT valid_entry_date CHECK (entry_date <= CURRENT_TIMESTAMP)
 );
 
-CREATE INDEX IF NOT EXISTS idx_positions_user ON positions (user_id);
-CREATE INDEX IF NOT EXISTS idx_positions_symbol ON positions (symbol);
+CREATE INDEX idx_positions_user_id ON positions(user_id);
+CREATE INDEX idx_positions_symbol ON positions(symbol);
+CREATE INDEX idx_positions_entry_date ON positions(entry_date);

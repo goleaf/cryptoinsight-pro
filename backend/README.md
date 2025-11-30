@@ -48,6 +48,8 @@ Located in `src/modules/portfolio`.
 - `PortfolioService`: orchestrates repository and pricing to provide summaries, allocations, and enriched positions.
 - `PortfolioController`: simple REST-style wrapper returning `{ status, body/message }` payloads.
 - Migration stub: `migrations/001_create_positions.sql` for a positions table with indexes.
+- `HistoricalValueService`: computes portfolio value over time using historical fetchers or current price fallbacks.
+- Express wiring example: `src/server.ts` exposes REST endpoints under `/api/portfolio/*`.
 
 ## Alerts Module
 Located in `src/modules/alerts`.

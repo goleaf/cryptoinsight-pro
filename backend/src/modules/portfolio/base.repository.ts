@@ -7,8 +7,12 @@ import { Position, PositionId, PositionInput, PositionUpdate, UserId } from './t
 export abstract class BaseRepository<T extends { id: PositionId; userId: UserId }> {
   protected store: Map<UserId, Map<PositionId, T>> = new Map();
 
-  protected now(): number {
-    return Date.now();
+  public clear(): void {
+    this.store.clear();
+  }
+
+  protected now(): Date {
+    return new Date();
   }
 
   protected getUserBucket(userId: UserId): Map<PositionId, T> {
@@ -33,6 +37,14 @@ export function validatePositionInput(input: PositionInput): void {
   if (!input.entryDate) {
     throw new Error('entryDate is required');
   }
+
+  const entryTime = Date.parse(input.entryDate);
+  if (Number.isNaN(entryTime)) {
+    throw new Error('entryDate must be a valid date');
+  }
+  if (entryTime > Date.now()) {
+    throw new Error('entryDate cannot be in the future');
+  }
 }
 
 export function validatePositionUpdate(input: PositionUpdate): void {
@@ -47,5 +59,15 @@ export function validatePositionUpdate(input: PositionUpdate): void {
   }
   if (input.entryDate !== undefined && !input.entryDate) {
     throw new Error('entryDate must be non-empty');
+  }
+
+  if (input.entryDate !== undefined) {
+    const entryTime = Date.parse(input.entryDate);
+    if (Number.isNaN(entryTime)) {
+      throw new Error('entryDate must be a valid date');
+    }
+    if (entryTime > Date.now()) {
+      throw new Error('entryDate cannot be in the future');
+    }
   }
 }

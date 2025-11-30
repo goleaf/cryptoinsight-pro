@@ -4,14 +4,14 @@ export type PositionId = string;
 export type UserId = string;
 
 export interface Position {
-  id: PositionId;
-  userId: UserId;
-  symbol: string;
-  amount: number;
-  entryPrice: number;
-  entryDate: string;
-  createdAt: number;
-  updatedAt: number;
+  id: PositionId;                    // UUID
+  userId: UserId;                    // User identifier
+  symbol: string;                    // Cryptocurrency symbol (e.g., 'BTC-USDT')
+  entryPrice: number;                // Price at which position was acquired
+  amount: number;                    // Quantity of cryptocurrency
+  entryDate: Date;                   // Date position was acquired
+  createdAt: Date;                   // Record creation timestamp
+  updatedAt: Date;                   // Record last update timestamp
 }
 
 export interface PositionInput {
@@ -29,36 +29,55 @@ export interface PositionUpdate {
 }
 
 export interface PositionWithMetrics extends Position {
-  currentPrice: number;
-  currentValue: number;
-  unrealizedPnl: number;
-  pnlPercent: number;
+  currentPrice: number;              // Current market price
+  currentValue: number;              // amount * currentPrice
+  initialValue: number;              // amount * entryPrice
+  unrealizedPnL: number;             // currentValue - initialValue
+  pnLPercentage: number;             // (unrealizedPnL / initialValue) * 100
+  priceTimestamp: number;            // Timestamp of current price
 }
 
 export interface PortfolioSummary {
-  totalValue: number;
-  totalUnrealizedPnl: number;
-  totalPnlPercent: number;
-  positionCount: number;
-  timestamp: number;
+  totalValue: number;                // Sum of all position current values
+  totalUnrealizedPnL: number;        // Sum of all position unrealized PnL
+  totalPnLPercentage: number;        // (totalUnrealizedPnL / totalInitialValue) * 100
+  positionCount: number;             // Number of positions
+  lastUpdated: number;               // Timestamp of calculation
 }
 
-export interface AllocationEntry {
+export interface AllocationItem {
   symbol: string;
   value: number;
   percentage: number;
+  color?: string;                    // For chart rendering
 }
 
 export interface PortfolioAllocation {
-  entries: AllocationEntry[];
+  items: AllocationItem[];
   totalValue: number;
-  timestamp: number;
+  lastUpdated: number;
 }
 
 export interface PriceQuote {
   symbol: string;
   price: number;
   timestamp: number;
+}
+
+export interface HistoricalDataPoint {
+  timestamp: number;
+  value: number;
+}
+
+export interface HistoricalPortfolioValue {
+  dataPoints: HistoricalDataPoint[];
+  startDate: number;
+  endDate: number;
+}
+
+export interface PriceDataPoint {
+  timestamp: number;
+  price: number;
 }
 
 export interface PriceSource {

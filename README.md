@@ -73,6 +73,15 @@ The built files will be in the `dist` directory.
 
 ```bash
 npm run preview
+
+## Quality Tooling
+
+- Lint: `npm run lint`
+- Unit tests: `npm run test:unit`
+- Integration tests (Express API): `npm run test:integration`
+- Coverage report: `npm run coverage`
+
+CI: GitHub Actions workflow `.github/workflows/ci.yml` runs lint, unit, integration tests, and coverage on push/PR.
 ```
 
 ## Project Structure

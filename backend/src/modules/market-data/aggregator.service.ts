@@ -64,6 +64,7 @@ export class MarketDataAggregator {
 
   /** Ingest ticker update */
   public ingestTicker(ticker: NormalizedTicker): void {
+    this.validateTicker(ticker);
     const symbolMap = this.ensureSymbolMap(this.tickerCache, ticker.symbol);
     symbolMap.set(ticker.exchange, ticker);
     this.safeCacheDelete(this.cacheKey('ticker', ticker.symbol));
@@ -72,6 +73,7 @@ export class MarketDataAggregator {
 
   /** Ingest order book update */
   public ingestOrderBook(book: NormalizedOrderBook, exchange: ExchangeId): void {
+    this.validateOrderBook(book);
     const symbolMap = this.ensureSymbolMap(this.orderBookCache, book.symbol);
     symbolMap.set(exchange, book);
     this.safeCacheDelete(this.cacheKey('orderbook', book.symbol));
@@ -298,6 +300,22 @@ export class MarketDataAggregator {
 
   private cacheKey(scope: 'ticker' | 'orderbook' | 'trades', symbol: Symbol): string {
     return `${scope}:${symbol}`;
+  }
+
+  private validateTicker(ticker: NormalizedTicker) {
+    if (!ticker?.symbol || !ticker.exchange) throw new Error('Invalid ticker');
+    if (!Number.isFinite(ticker.price) || !Number.isFinite(ticker.bid) || !Number.isFinite(ticker.ask)) {
+      throw new Error('Invalid ticker pricing');
+    }
+    if (!Number.isFinite(ticker.volume24h) || ticker.volume24h < 0) {
+      throw new Error('Invalid ticker volume');
+    }
+  }
+
+  private validateOrderBook(book: NormalizedOrderBook) {
+    if (!book?.symbol || !Array.isArray(book.bids) || !Array.isArray(book.asks)) {
+      throw new Error('Invalid order book');
+    }
   }
 
   private ensureSymbolMap<T>(store: Map<Symbol, Map<ExchangeId, T>>, symbol: Symbol): Map<ExchangeId, T> {
